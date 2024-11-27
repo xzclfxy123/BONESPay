@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -131,24 +132,30 @@ export function TransactionRecords({ isLoggedIn, account, connectWallet }: { isL
               {currencies.map((currency) => (
                 <div key={currency} className="flex items-center space-x-2">
                   <RadioGroupItem value={currency} id={currency} />
-                  <Label htmlFor={currency}>{currency}</Label>
+                  <Label htmlFor={currency}>
+                    <div className="flex items-center space-x-2">
+                      <Image src={`/${currency.toLowerCase()}.png`} alt={currency} width={20} height={20} />
+                      <span>{currency}</span>
+                    </div>
+                  </Label>
                 </div>
               ))}
             </RadioGroup>
           </DialogContent>
         </Dialog>
       </div>
-      <Card className="p-4">
+      <div className="space-y-4">
         {transactions.length > 0 ? (
           transactions.map((tx) => (
-            <div 
+            <Card 
               key={tx.id} 
-              className="py-4 border-b last:border-0 cursor-pointer hover:bg-gray-50 transition-colors"
+              className="p-4 cursor-pointer transition-colors hover:bg-gray-50"
               onClick={() => handleTransactionClick(tx.tx_hash)}
             >
               <div className="flex justify-between items-start mb-2">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
+                    <Image src={`/${tx.asset.toLowerCase()}.png`} alt={tx.asset} width={24} height={24} />
                     <p className="text-sm font-medium">交易</p>
                     <p className="text-sm text-gray-500">{tx.amount} {tx.asset}</p>
                   </div>
@@ -172,20 +179,22 @@ export function TransactionRecords({ isLoggedIn, account, connectWallet }: { isL
                   <span>{truncateString(tx.tx_hash)}</span>
                 </div>
               </div>
-            </div>
+            </Card>
           ))
         ) : (
-          <div className="flex flex-col items-center justify-center py-12 space-y-4">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                <path d="M9 10h.01M15 10h.01M9.5 15.5c1.333-1 3.667-1 5 0" />
-              </svg>
+          <Card className="p-4">
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                <svg className="w-8 h-8 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path d="M9 10h.01M15 10h.01M9.5 15.5c1.333-1 3.667-1 5 0" />
+                </svg>
+              </div>
+              <p className="text-gray-500">当前没有交易记录</p>
             </div>
-            <p className="text-gray-500">当前没有交易记录</p>
-          </div>
+          </Card>
         )}
-      </Card>
+      </div>
 
       {transactions.length > 0 && (
         <div className="flex justify-center items-center space-x-4 mt-4">

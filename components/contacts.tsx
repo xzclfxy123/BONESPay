@@ -26,9 +26,10 @@ interface Contact {
 interface ContactsProps {
   isLoggedIn: boolean
   userId: string
+  onContactsChange: (contacts: Contact[]) => void
 }
 
-export default function Contacts({ isLoggedIn, userId }: ContactsProps) {
+export default function Contacts({ isLoggedIn, userId, onContactsChange }: ContactsProps) {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [isAddingContact, setIsAddingContact] = useState(false)
   const [newContact, setNewContact] = useState({ name: '', address: '' })
@@ -54,6 +55,7 @@ export default function Contacts({ isLoggedIn, userId }: ContactsProps) {
     try {
       const fetchedContacts = await getContacts(userId);
       setContacts(fetchedContacts);
+      onContactsChange(fetchedContacts);
     } catch (error) {
       console.error('Error fetching contacts:', error);
     }
@@ -73,7 +75,9 @@ export default function Contacts({ isLoggedIn, userId }: ContactsProps) {
       }
       try {
         const addedContact = await addContact(userId, newContact.name, newContact.address);
-        setContacts(prevContacts => [...prevContacts, addedContact]);
+        const updatedContacts = [...contacts, addedContact];
+        setContacts(updatedContacts);
+        onContactsChange(updatedContacts);
         setNewContact({ name: '', address: '' });
         setIsAddingContact(false);
         setAddressError('');
@@ -87,7 +91,9 @@ export default function Contacts({ isLoggedIn, userId }: ContactsProps) {
     if (deletingContact) {
       try {
         await deleteContact(userId, deletingContact.id);
-        setContacts(prevContacts => prevContacts.filter(contact => contact.id !== deletingContact.id));
+        const updatedContacts = contacts.filter(contact => contact.id !== deletingContact.id);
+        setContacts(updatedContacts);
+        onContactsChange(updatedContacts);
         setDeletingContact(null);
         toast({
           title: "删除成功",
@@ -107,9 +113,11 @@ export default function Contacts({ isLoggedIn, userId }: ContactsProps) {
       }
       try {
         const updatedContact = await updateContact(userId, editingContact.id, editingContact.name, editingContact.address);
-        setContacts(prevContacts => prevContacts.map(contact => 
+        const updatedContacts = contacts.map(contact => 
           contact.id === updatedContact.id ? updatedContact : contact
-        ));
+        );
+        setContacts(updatedContacts);
+        onContactsChange(updatedContacts);
         setEditingContact(null);
         setAddressError('');
       } catch (error) {

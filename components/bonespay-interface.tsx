@@ -16,6 +16,18 @@ import { ContactSelector } from './contact-selector'
 import { useRouter } from 'next/navigation'
 import { QRCodeModal } from './qr-code-modal'
 import { TransferStatusDialog } from './transfer-status-dialog'
+import toast, { Toaster } from 'react-hot-toast'
+import { SettingsModal } from './settings-modal'
+import { getUserName } from '@/app/actions/user-settings'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { ChevronDown } from 'lucide-react'
+
+
 
 const PLATON_MAINNET_PARAMS = {
   chainId: '0x335f9', 
@@ -88,6 +100,9 @@ export function BONESPayInterface() {
   const [qrModalTitle, setQrModalTitle] = useState('')
   const [transferStatus, setTransferStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [showTransferStatus, setShowTransferStatus] = useState(false)
+  const [activeTab, setActiveTab] = useState('assets')
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [displayName, setDisplayName] = useState('')
   const router = useRouter()
   const transferTabRef = useRef<HTMLButtonElement>(null)
 
@@ -103,6 +118,7 @@ export function BONESPayInterface() {
         setAccount(accounts[0])
         localStorage.setItem('connectedAccount', accounts[0])
         await fetchBalances(accounts[0])
+        await fetchDisplayName(accounts[0])
       } catch (error) {
         console.error('连接MetaMask时出错:', error)
       } finally {
@@ -132,6 +148,17 @@ export function BONESPayInterface() {
     }
   }, [])
 
+  const fetchDisplayName = async (address: string) => {
+    try {
+      const name = await getUserName(address)
+      if (name) {
+        setDisplayName(name)
+      }
+    } catch (error) {
+      console.error('Error fetching display name:', error)
+    }
+  }
+
   const truncateAddress = (address: string) => {
     if (!address) return ''
     return `${address.slice(0, 4)}...${address.slice(-4)}`
@@ -140,9 +167,18 @@ export function BONESPayInterface() {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text)
-      alert('地址已复制到剪贴板!')
+      toast.success('地址已复制到剪贴板', {
+        duration: 2000,
+        position: 'top-center',
+        icon: '👍',
+      })
     } catch (err) {
       console.error('复制文本失败: ', err)
+      toast.error('无法复制地址到剪贴板', {
+        duration: 2000,
+        position: 'top-center',
+        icon: '❌',
+      })
     }
   }
 
@@ -154,6 +190,7 @@ export function BONESPayInterface() {
       USDT: '0',
       USDC: '0',
     })
+    setDisplayName('')
     localStorage.removeItem('connectedAccount')
   }
 
@@ -225,7 +262,7 @@ export function BONESPayInterface() {
       setIsTransferring(false)
       setTimeout(() => {
         setShowTransferStatus(false)
-      }, 3000) // Close the dialog after 3 seconds
+      }, 3000) 
     }
   }
 
@@ -252,35 +289,32 @@ export function BONESPayInterface() {
     setShowQRModal(true)
   }
 
-  const handleTransferClick = () => {
-    const transferTab = document.querySelector('[value="transferRecords"]') as HTMLElement;
-    if (transferTab) {
-      transferTab.click();
-      setTimeout(() => {
-        const transferSection = document.getElementById('transfer-section');
-        if (transferSection) {
-          transferSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
+  const handleTransferClick = useCallback(() => {
+    setActiveTab('transferRecords')
+    if (transferTabRef.current) {
+      transferTabRef.current.click()
     }
-  };
+    setTimeout(() => {
+      const transferSection = document.getElementById('transfer-section')
+      if (transferSection) {
+        transferSection.scrollIntoView({ behavior: 'smooth' })
+      }
+    }, 100)
+  }, [])
 
   const handleHeaderQRCodeClick = () => {
-    handleQRCodeClick('收款');
-  };
+    handleQRCodeClick('收款')
+  }
 
   const handleHistoryClick = () => {
-    const transactionRecordsTab = document.querySelector('[value="transactionRecords"]') as HTMLElement;
-    if (transactionRecordsTab) {
-      transactionRecordsTab.click();
-      setTimeout(() => {
-        const transactionRecordsSection = document.getElementById('transaction-records-section');
-        if (transactionRecordsSection) {
-          transactionRecordsSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
-    }
-  };
+    setActiveTab('transactionRecords')
+    setTimeout(() => {
+      const transactionRecordsSection = document.getElementById('transaction-records-section')
+      if (transactionRecordsSection) {
+        transactionRecordsSection.scrollIntoView({ behavior: 'smooth' })
+      }
+    }, 100)
+  }
 
   useEffect(() => {
     const fetchExchangeRate = async () => {
@@ -303,6 +337,7 @@ export function BONESPayInterface() {
     if (savedAccount) {
       setAccount(savedAccount)
       fetchBalances(savedAccount)
+      fetchDisplayName(savedAccount)
     }
 
     const handleAccountsChanged = (accounts: string[]) => {
@@ -311,6 +346,7 @@ export function BONESPayInterface() {
       if (newAccount) {
         localStorage.setItem('connectedAccount', newAccount)
         fetchBalances(newAccount)
+        fetchDisplayName(newAccount)
       } else {
         localStorage.removeItem('connectedAccount')
         setBalances({
@@ -318,6 +354,7 @@ export function BONESPayInterface() {
           USDT: '0',
           USDC: '0',
         })
+        setDisplayName('')
       }
     }
 
@@ -347,6 +384,7 @@ export function BONESPayInterface() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-l from-purple-50 to-[#FFFEFF]">
+      <Toaster />
       <header className="flex items-center justify-between p-4 bg-none">
         <div className="flex items-center space-x-4">
           <a href='/' className="flex items-center space-x-4">
@@ -357,6 +395,40 @@ export function BONESPayInterface() {
             <a href="https://bones.icu/" className="text-sm font-medium ml-8">BONESDAO</a>
             <a href="https://onboard.bones.icu/" className="text-sm font-medium">ONBOARD</a>
             <a href="https://scan.platon.network/" className="text-sm font-medium">PlatScan</a>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center text-sm font-medium">
+                Dapps <ChevronDown className="ml-1 h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem className="flex items-center">
+                  {/* <Image src="/bones-logo.png" alt="BONES" width={20} height={20} className="mr-2" /> */}
+                  BONES
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center">
+                  {/* <Image src="/niftyin-logo.png" alt="NiftyIN" width={20} height={20} className="mr-2" /> */}
+                  NiftyIN
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center">
+                  {/* <Image src="/dipoleswap-logo.png" alt="DipoleSwap" width={20} height={20} className="mr-2" /> */}
+                  DipoleSwap
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center text-sm font-medium">
+                Wallets <ChevronDown className="ml-1 h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem className="flex items-center">
+                  {/* <Image src="/aton-logo.png" alt="ATON" width={20} height={20} className="mr-2" /> */}
+                  ATON
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center">
+                  {/* <Image src="/top-wallet-logo.png" alt="TOP Wallet" width={20} height={20} className="mr-2" /> */}
+                  TOP Wallet
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </nav>
         </div>
         <div className="flex items-center space-x-1 mr-2">
@@ -374,7 +446,7 @@ export function BONESPayInterface() {
               className="relative"
               onMouseEnter={() => setIsOpen(true)}
               onMouseLeave={() => {
-                setTimeout(() => setIsOpen(false), 300); // 300ms delay
+                setTimeout(() => setIsOpen(false), 300)
               }}
             >
               <div className="px-4 py-1.5 bg-gradient-to-r from-purple-50 to-white rounded-full border border-purple-100 cursor-pointer hover:bg-purple-50">
@@ -403,6 +475,7 @@ export function BONESPayInterface() {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8"
+                              onClick={() => window.open(`https://scan.platon.network/address-detail?address=${account}`, '_blank')}
                             >
                               <ExternalLink className="h-4 w-4" />
                             </Button>
@@ -415,7 +488,7 @@ export function BONESPayInterface() {
                     className="relative px-2 py-1 hover:bg-purple-50 cursor-pointer"
                     onMouseEnter={() => setWalletHovered(true)}
                     onMouseLeave={() => {
-                      setTimeout(() => setWalletHovered(false), 300); // 300ms delay
+                      setTimeout(() => setWalletHovered(false), 300)
                     }}
                   >
                     <div className="relative flex items-center gap-2 px-2 py-1">
@@ -431,13 +504,25 @@ export function BONESPayInterface() {
                       )}
                     </div>               
                   </div>
-                  <div className="px-2 py-1 hover:bg-purple-50 cursor-pointer">
+                  <div 
+                    className="px-2 py-1 hover:bg-purple-50 cursor-pointer"
+                    onClick={() => {
+                      setIsSettingsOpen(true);
+                      setIsOpen(false);
+                    }}
+                  >
                     <div className="flex items-center gap-2 p-2">
                       <User className="h-4 w-4" />
                       <span>账户信息</span>
                     </div>
                   </div>
-                  <div className="px-2 py-1 hover:bg-purple-50 cursor-pointer">
+                  <div 
+                    className="px-2 py-1 hover:bg-purple-50 cursor-pointer"
+                    onClick={() => {
+                      setActiveTab('contacts');
+                      setIsOpen(false);
+                    }}
+                  >
                     <div className="flex items-center gap-2 p-2">
                       <Users className="h-4 w-4" />
                       <span>联系人</span>
@@ -467,7 +552,7 @@ export function BONESPayInterface() {
         </div>
       </header>
       <main className="flex-grow p-4 max-w-md mx-auto w-full mt-10">
-        <Tabs defaultValue="assets" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex justify-center"> 
             <TabsList className="grid max-w-xs grid-cols-4 bg-purple-100 p-1 rounded-lg">
               <TabsTrigger
@@ -514,14 +599,28 @@ export function BONESPayInterface() {
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <div className="space-y-1">
-                    <h2 className="text-lg font-medium">{truncateAddress(account)}</h2>
-                    <p className="text-sm text-gray-500">{truncateAddress(account)} <Copy className="h-4 w-4 inline ml-1 cursor-pointer" onClick={() => copyToClipboard(account)} /></p>
+                    <h2 className="text-lg font-medium">
+                      {displayName || truncateAddress(account)}
+                    </h2>
+                    <p className="text-sm text-gray-500">
+                      {truncateAddress(account)} 
+                      <Copy 
+                        className="h-4 w-4 inline ml-1 cursor-pointer" 
+                        onClick={() => copyToClipboard(account)} 
+                      />
+                    </p>
                   </div> 
                   <div className="flex gap-2">
-                    <button className="p-2 bg-purple-100 rounded-full" onClick={handleLogout}>
+                    <button 
+                      className="p-2 bg-purple-100 rounded-full" 
+                      onClick={handleLogout}
+                    >
                       <LogOut className="h-4 w-4" />
                     </button>
-                    <button className="p-2 bg-gray-500 rounded-full" disabled>
+                    <button 
+                      className="p-2 bg-purple-100 rounded-full hover:bg-purple-200 transition-colors"
+                      onClick={() => setIsSettingsOpen(true)}
+                    >
                       <Settings className="h-4 w-4" />
                     </button>
                   </div>
@@ -672,7 +771,7 @@ export function BONESPayInterface() {
             <TransactionRecords isLoggedIn={!!account} account={account} connectWallet={connectWallet} />
           </TabsContent>
           <TabsContent value="contacts" className="mt-6 border-2 border-white rounded-lg p-4 shadow-2xl h-[600px] ">
-            <Contacts isLoggedIn={!!account} userId={account} />
+            <Contacts isLoggedIn={!!account} userId={account} onContactsChange={(newContacts) => setContacts(newContacts)} />
           </TabsContent>
         </Tabs>
       </main>
@@ -693,6 +792,13 @@ export function BONESPayInterface() {
         onClose={() => setShowTransferStatus(false)}
         status={transferStatus}
         errorMessage={transferError}
+      />
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        account={account}
+        displayName={displayName}
+        onUpdateName={setDisplayName}
       />
     </div>
   )
