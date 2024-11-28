@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -77,6 +78,38 @@ const getExchangeRate = async () => {
   }
   throw new Error('Failed to fetch exchange rate')
 }
+
+const DAPPS_LINKS = [
+  {
+    name: 'BONES',
+    icon: '/bones-2.png',
+    href: 'https://t.me/Bones_Gamebot/bones' 
+  },
+  {
+    name: 'NiftyIN',
+    icon: '/NiftyIN.png', 
+    href: 'https://www.niftyin.xyz' 
+  },
+  {
+    name: 'DipoleSwap',
+    icon: '/DipoleSwap.png',
+    href: 'https://dipoleswap.exchange' 
+  }
+]
+
+const WALLETS_LINKS = [
+  {
+    name: 'ATON',
+    icon: '/ATON.png',
+    href: 'https://www.platon.network/wallet' 
+  },
+  {
+    name: 'TOP Wallet',
+    icon: '/TOPWallet.png',
+    href: 'https://www.paytop.io/' 
+  }
+]
+
 
 export function BONESPayInterface() {
   const [account, setAccount] = useState('')
@@ -396,39 +429,58 @@ export function BONESPayInterface() {
             <a href="https://onboard.bones.icu/" className="text-sm font-medium">ONBOARD</a>
             <a href="https://scan.platon.network/" className="text-sm font-medium">PlatScan</a>
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center text-sm font-medium">
-                Dapps <ChevronDown className="ml-1 h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem className="flex items-center">
-                  {/* <Image src="/bones-logo.png" alt="BONES" width={20} height={20} className="mr-2" /> */}
-                  BONES
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center">
-                  {/* <Image src="/niftyin-logo.png" alt="NiftyIN" width={20} height={20} className="mr-2" /> */}
-                  NiftyIN
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center">
-                  {/* <Image src="/dipoleswap-logo.png" alt="DipoleSwap" width={20} height={20} className="mr-2" /> */}
-                  DipoleSwap
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center text-sm font-medium">
-                Wallets <ChevronDown className="ml-1 h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem className="flex items-center">
-                  {/* <Image src="/aton-logo.png" alt="ATON" width={20} height={20} className="mr-2" /> */}
-                  ATON
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center">
-                  {/* <Image src="/top-wallet-logo.png" alt="TOP Wallet" width={20} height={20} className="mr-2" /> */}
-                  TOP Wallet
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+        <DropdownMenuTrigger className="flex items-center text-sm font-medium">
+          Dapps <ChevronDown className="ml-1 h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {DAPPS_LINKS.map((item) => (
+            <DropdownMenuItem key={item.name} asChild>
+              <Link 
+                href={item.href}
+                className="flex items-center"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image 
+                  src={item.icon} 
+                  alt={item.name} 
+                  width={20} 
+                  height={20} 
+                  className="mr-2" 
+                />
+                {item.name}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex items-center text-sm font-medium">
+          Wallets <ChevronDown className="ml-1 h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {WALLETS_LINKS.map((item) => (
+            <DropdownMenuItem key={item.name} asChild>
+              <Link 
+                href={item.href}
+                className="flex items-center"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Image 
+                  src={item.icon} 
+                  alt={item.name} 
+                  width={20} 
+                  height={20} 
+                  className="mr-2" 
+                />
+                {item.name}
+              </Link>
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
           </nav>
         </div>
         <div className="flex items-center space-x-1 mr-2">
@@ -451,7 +503,7 @@ export function BONESPayInterface() {
             >
               <div className="px-4 py-1.5 bg-gradient-to-r from-purple-50 to-white rounded-full border border-purple-100 cursor-pointer hover:bg-purple-50">
                 <span className="text-sm font-medium text-purple-900">
-                  {truncateAddress(account)}
+                  {displayName || truncateAddress(account)}
                 </span>
               </div>
               {isOpen && (
