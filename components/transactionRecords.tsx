@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, Loader2 } from 'lucide-react'
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
@@ -30,9 +30,11 @@ export function TransactionRecords({ isLoggedIn, account, connectWallet }: { isL
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCurrency, setSelectedCurrency] = useState('所有币种')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const fetchTransactions = async () => {
+      setIsLoading(true)
       try {
         const response = await fetch(`/api/transactions?page=${currentPage}&limit=3&search=${searchQuery}&currency=${selectedCurrency}&userAddress=${account}`)
         if (response.ok) {
@@ -44,6 +46,8 @@ export function TransactionRecords({ isLoggedIn, account, connectWallet }: { isL
         }
       } catch (error) {
         console.error('Error fetching transactions:', error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -145,7 +149,14 @@ export function TransactionRecords({ isLoggedIn, account, connectWallet }: { isL
         </Dialog>
       </div>
       <div className="space-y-4">
-        {transactions.length > 0 ? (
+        {isLoading ? (
+          <Card className="p-4">
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+              <p className="text-gray-500">正在加载交易记录...</p>
+            </div>
+          </Card>
+        ) : transactions.length > 0 ? (
           transactions.map((tx) => (
             <Card 
               key={tx.id} 
@@ -202,7 +213,7 @@ export function TransactionRecords({ isLoggedIn, account, connectWallet }: { isL
             variant="ghost"
             size="icon"
             onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
+            disabled={currentPage === 1 || isLoading}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -213,7 +224,7 @@ export function TransactionRecords({ isLoggedIn, account, connectWallet }: { isL
             variant="ghost"
             size="icon"
             onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages || isLoading}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
