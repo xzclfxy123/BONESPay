@@ -421,8 +421,8 @@ export function BONESPayInterface() {
       <header className="flex items-center justify-between p-4 bg-none">
         <div className="flex items-center space-x-4">
           <a href='/' className="flex items-center space-x-4">
-            <Image src="/bons.png" alt="BONESPay logo" width={32} height={32} className="w-8 h-8" />
-            <h1 className="text-2xl font-bold">BONESPay</h1>
+            <Image src="/Dew.png" alt="BONESPay logo" width={32} height={32} className="w-8 h-8" />
+            <h1 className="text-2xl font-bold">DeworkPay</h1>
           </a>
           <nav className="hidden md:flex space-x-4 border-l">
             <a href="https://bones.icu/" className="text-sm font-medium ml-8">BONESDAO</a>
@@ -481,6 +481,8 @@ export function BONESPayInterface() {
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
+      <a href="./pages/pools" className="text-sm font-medium">Pools</a>
+      <a href="./pages/quant" className="text-sm font-medium">Quant</a>
           </nav>
         </div>
         <div className="flex items-center space-x-1 mr-2">
