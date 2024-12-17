@@ -86,7 +86,7 @@ export function Header() {
         </Link>
         <nav className="hidden md:flex space-x-4 border-l">
           <Link href="https://bones.icu/" className="text-sm font-medium ml-8">BONESDAO</Link>
-          <Link href="https://onboard.bones.icu/" className="text-sm font-medium">ONBOARD</Link>
+          <Link href="https://register.deworkhub.com/" className="text-sm font-medium">Register</Link>
           <Link href="https://scan.platon.network/" className="text-sm font-medium">PlatScan</Link>
           <Link href="/pools" className="text-sm font-medium">Pools</Link>
           <DropdownMenu>

@@ -415,6 +415,14 @@ export function BONESPayInterface() {
     }
   }, [account])
 
+  // 添加延迟时间常量
+  const HOVER_DELAY = 300;  // 300ms
+  const CLOSE_DELAY = 1000; // 1000ms
+
+  // 添加状态来跟踪鼠标是否在下拉菜单上
+  const [isMenuHovered, setIsMenuHovered] = useState(false);
+  const closeTimeoutRef = useRef<NodeJS.Timeout>();
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-l from-purple-50 to-[#FFFEFF]">
       <Toaster />
@@ -426,7 +434,7 @@ export function BONESPayInterface() {
           </a>
           <nav className="hidden md:flex space-x-4 border-l">
             <a href="https://bones.icu/" className="text-sm font-medium ml-8">BONESDAO</a>
-            <a href="https://onboard.bones.icu/" className="text-sm font-medium">ONBOARD</a>
+            <a href="https://register.deworkhub.com/" className="text-sm font-medium">Register</a>
             <a href="https://scan.platon.network/" className="text-sm font-medium">PlatScan</a>
             <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center text-sm font-medium">
@@ -498,9 +506,20 @@ export function BONESPayInterface() {
           {account ? (
             <div 
               className="relative"
-              onMouseEnter={() => setIsOpen(true)}
+              onMouseEnter={() => {
+                setIsOpen(true);
+                // 清除任何现有的关闭定时器
+                if (closeTimeoutRef.current) {
+                  clearTimeout(closeTimeoutRef.current);
+                }
+              }}
               onMouseLeave={() => {
-                setTimeout(() => setIsOpen(false), 300)
+                // 设置延迟关闭
+                closeTimeoutRef.current = setTimeout(() => {
+                  if (!isMenuHovered) {
+                    setIsOpen(false);
+                  }
+                }, CLOSE_DELAY);
               }}
             >
               <div className="px-4 py-1.5 bg-gradient-to-r from-purple-50 to-white rounded-full border border-purple-100 cursor-pointer hover:bg-purple-50">
@@ -509,7 +528,21 @@ export function BONESPayInterface() {
                 </span>
               </div>
               {isOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-2 z-40">
+                <div 
+                  className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-2 z-40"
+                  onMouseEnter={() => {
+                    setIsMenuHovered(true);
+                    if (closeTimeoutRef.current) {
+                      clearTimeout(closeTimeoutRef.current);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    setIsMenuHovered(false);
+                    closeTimeoutRef.current = setTimeout(() => {
+                      setIsOpen(false);
+                    }, HOVER_DELAY);
+                  }}
+                >
                   <div className="flex justify-center mt-2 mb-2">
                     <div className="p-4 space-y-3 bg-purple-100 rounded-md w-[90%]">
                       <div className="space-y-1">
