@@ -164,7 +164,6 @@ const Pools = () => {
     }
 
     setIsDelegating(true);
-    // 创建一个 loading toast 并保存它的 ID
     const toastId = toast.loading('委托处理中...', { 
       icon: '⏳',
       ...toastStyle 
@@ -187,19 +186,53 @@ const Pools = () => {
         params: [param],
       });
 
-      // 使用相同的 toastId 更新成功消息
-      toast.success(`成功委托 ${amount} LAT`, {
-        id: toastId,  // 使用相同的 toastId
-        icon: '🎉',
-        ...toastStyle
-      });
-      setShowDelegateModal(false);
-      fetchNodes();
+      // 等待交易被确认
+      let receipt = null;
+      while (!receipt) {
+        try {
+          receipt = await web3.eth.getTransactionReceipt(txHash);
+          if (!receipt) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        } catch (err) {
+          console.log('等待交易确认中...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+
+      if (receipt.status) {
+        toast.success(`成功委托 ${amount} LAT`, {
+          id: toastId,
+          icon: '🎉',
+          ...toastStyle
+        });
+        setShowDelegateModal(false);
+        
+        // 刷新节点列表和委托列表
+        fetchNodes();
+        
+        // 延迟一段时间后刷新委托列表
+        setTimeout(async () => {
+          try {
+            const platONAddress = convertToPlatONAddress(account);
+            await fetchDelegations(platONAddress);
+            // 切换到我的委托标签页
+            setSelectedTab("mydelegations");
+          } catch (error) {
+            console.error('刷新委托列表失败:', error);
+          }
+        }, 3000);
+      } else {
+        toast.error('委托失败，请重试', {
+          id: toastId,
+          icon: '❌',
+          ...toastStyle
+        });
+      }
     } catch (error) {
       console.error('委托错误:', error);
-      // 使用相同的 toastId 更新错误消息
       toast.error('委托失败，请重试', {
-        id: toastId,  // 使用相同的 toastId
+        id: toastId,
         icon: '❌',
         ...toastStyle
       });
@@ -855,7 +888,7 @@ const Pools = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>区块</TableHead>
-                      <TableHead>冻结的委托金额</TableHead>
+                      <TableHead>冻结��委托金额</TableHead>
                       <TableHead>已解冻的委托金额</TableHead>
                       <TableHead>未解冻的委托金额</TableHead>
                       <TableHead>预计解冻时间</TableHead>
