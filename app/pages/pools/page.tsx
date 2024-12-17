@@ -25,7 +25,8 @@ const SUPPORTED_CHAINS = [
 ]
 
 const SUPPORTED_NETWORKS = [
-  { id: 'platon', name: 'PlatON Network', logo: '/lat.png', chainType: 'evm' }
+  { id: 'platon', name: 'PlatON Network', logo: '/lat.png', chainType: 'evm', disabled: false },
+  { id: 'iris', name: 'IRIS Network', logo: '/iris.png', chainType: 'wasm', disabled: true }
 ]
 
 const STATUS_MAP = {
@@ -141,48 +142,75 @@ const Pools = () => {
     fetchMyDelegations();
   }, [currentDelegationPage]);
 
+  // 定义通用的 toast 样式
+  const toastStyle = {
+    style: {
+      borderRadius: '10px',
+      background: '#333',
+      color: '#fff',
+      padding: '16px',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    },
+    duration: 4000,
+  };
+
   const handleDelegate = async (amount: string) => {
     if (!window.ethereum) {
-      toast.error('请安装 MetaMask');
+      toast.error('请安装 MetaMask', { 
+        icon: '🦊',
+        ...toastStyle 
+      });
       return;
     }
 
     setIsDelegating(true);
+    // 创建一个 loading toast 并保存它的 ID
+    const toastId = toast.loading('委托处理中...', { 
+      icon: '⏳',
+      ...toastStyle 
+    });
+
     try {
       const web3 = new Web3(window.ethereum);
       const accounts = await web3.eth.requestAccounts();
       const account = accounts[0];
 
-      // 使用用户输入的金额
       const amountWei = BigInt(Web3.utils.toWei(amount, "ether"));
-
-      // 使用 getParam 构造交易参数
       const param = getParam(1004, account, [
-        0,  // type
-        selectedNode.nodeId,  // nodeId
-        amountWei  // 使用用户输入的金额
+        0,
+        selectedNode.nodeId,
+        amountWei
       ]);
 
-      // 使用 window.ethereum.request 发送交易
-      const result = await window.ethereum.request({
+      const txHash = await window.ethereum.request({
         method: "eth_sendTransaction",
         params: [param],
       });
 
-      console.log('交易结果:', result);
-      toast.success('委托成功');
+      // 使用相同的 toastId 更新成功消息
+      toast.success(`成功委托 ${amount} LAT`, {
+        id: toastId,  // 使用相同的 toastId
+        icon: '🎉',
+        ...toastStyle
+      });
       setShowDelegateModal(false);
       fetchNodes();
     } catch (error) {
       console.error('委托错误:', error);
-      toast.error('委托失败，请重试');
+      // 使用相同的 toastId 更新错误消息
+      toast.error('委托失败，请重试', {
+        id: toastId,  // 使用相同的 toastId
+        icon: '❌',
+        ...toastStyle
+      });
     } finally {
       setIsDelegating(false);
     }
   };
 
   const fetchDelegations = async (accountAddress: string) => {
-    setIsLoading(true);
+    setIsLoading(true); // 开始加载
+    
     try {
       const url = "/api/staking/delegationListByAddress";
       const config = {
@@ -204,50 +232,52 @@ const Pools = () => {
 
       const responseData = await response.json();
 
-      console.log('Delegation Response:', responseData);
-
-      if (responseData.code === 0 && responseData.totalCount > 0) {
-        // 获取每个委托的 stakingBlockNum
-        const delegationsWithStakingBlock = await Promise.all(
-          responseData.data.map(async (delegation: any) => {
-            try {
-              // 获取节点信息的 API 调用
-              const nodeResponse = await fetch("/api/staking/stakingDetails", {
-                method: 'POST',
-                headers: config.headers,
-                body: JSON.stringify({
-                  nodeId: delegation.nodeId,
-                  stakingBlockNum: "latest" // 添加这个参数
-                })
-              });
-              const nodeData = await nodeResponse.json();
-              console.log('Node staking details:', nodeData);
-              
-              if (nodeData.code === 0 && nodeData.data) {
-                return {
-                  ...delegation,
-                  stakingBlockNum: nodeData.data.stakingBlockNum || nodeData.data.StakingBlockNum
-                };
+      if (responseData.code === 0) {
+        if (responseData.totalCount > 0) {
+          const delegationsWithStakingBlock = await Promise.all(
+            responseData.data.map(async (delegation: any) => {
+              try {
+                const nodeResponse = await fetch("/api/staking/stakingDetails", {
+                  method: 'POST',
+                  headers: config.headers,
+                  body: JSON.stringify({
+                    nodeId: delegation.nodeId,
+                    stakingBlockNum: "latest"
+                  })
+                });
+                const nodeData = await nodeResponse.json();
+                
+                if (nodeData.code === 0 && nodeData.data) {
+                  return {
+                    ...delegation,
+                    stakingBlockNum: nodeData.data.stakingBlockNum || nodeData.data.StakingBlockNum
+                  };
+                }
+                return delegation;
+              } catch (error) {
+                console.error('Error fetching staking block:', error);
+                return delegation;
               }
-              return delegation;
-            } catch (error) {
-              console.error('Error fetching staking block:', error);
-              return delegation;
-            }
-          })
-        );
+            })
+          );
 
-        console.log('Delegations with staking block:', delegationsWithStakingBlock);
-        setDelegations(delegationsWithStakingBlock);
+          setDelegations(delegationsWithStakingBlock);
+        } else {
+          setDelegations([]); // 设置空数组
+        }
       } else {
-        console.warn('没有找到委托信息');
-        toast.error('没有找到委托信息');
+        console.warn('获取委托列表失败:', responseData.errMsg);
+        setDelegations([]); // 设置空数组
       }
     } catch (error) {
       console.error('Error fetching delegations:', error);
-      toast.error('获取委托列表失败，请稍后重试');
+      setDelegations([]); // 设置空数组
+    } finally {
+      // 延迟一下加载状态的结束，让用户能看到加载动画
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
     }
-    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -276,101 +306,45 @@ const Pools = () => {
   }, []);
 
   const handleReduceDelegate = async (nodeId: string, stakingBlockNum: string, amount: string) => {
-    console.log('Reducing delegate with params:', { nodeId, stakingBlockNum, amount });
-    if (!window.ethereum) {
-      toast.error('请安装 MetaMask');
-      return;
-    }
-
-    if (!stakingBlockNum) {
-      console.error('Missing stakingBlockNum for node:', nodeId);
-      toast.error('无法获取质押块高，请重试');
-      return;
-    }
-
-    const delegation = delegations.find(d => d.nodeId === nodeId);
-    if (!delegation) {
-      toast.error('找不到委托信息');
-      return;
-    }
-
-    // 修改可用金额计算，使用总委托金额
-    const availableAmount = Number(delegation.delegateValue);
-    const reduceAmount = Number(amount);
-
-    if (reduceAmount > availableAmount) {
-      toast.error(`可减持金额不足，最多可减持 ${availableAmount} LAT`);
-      return;
-    }
-
-    // 计算预估解冻时间
-    const currentTimestamp = Math.floor(Date.now() / 1000); // 当前时间戳（秒）
-    const unlockTimestamp = currentTimestamp + (168 * 10750); // 解冻时间戳
-    const estimatedUnlockDate = new Date(unlockTimestamp * 1000);
-
-    // 如果减持的金额包含锁定部分，显示提示信息
-    const lockedAmount = Number(delegation.delegateLocked);
-    if (reduceAmount > (availableAmount - lockedAmount)) {
-      const willBeFrozen = Math.min(reduceAmount, lockedAmount);
-      toast.success(
-        `减持的 ${willBeFrozen} LAT 将被冻结直到 ${estimatedUnlockDate.toLocaleDateString()} ${estimatedUnlockDate.toLocaleTimeString()}`
-      );
-    }
-
     setIsLoading(true);
     try {
+      toast.loading('减持处理中...', {
+        icon: '⏳',
+        ...toastStyle
+      });
+
       const web3 = new Web3(window.ethereum);
       const accounts = await web3.eth.requestAccounts();
       const account = accounts[0];
 
-      // 将金额转换为 BigInt
       const amountInWei = BigInt(web3.utils.toWei(amount, 'ether'));
-
-      // 获取当前区块时间戳
-      const currentBlock = await web3.eth.getBlock('latest');
-      const withdrawTimestamp = Number(currentBlock.timestamp);
-      const unlockTimestamp = withdrawTimestamp + (168 * 10750); // 计算解冻时间
-      const estimatedUnlockDate = new Date(unlockTimestamp * 1000);
-
-      // 如果减持的金额包含锁定部分，显示提示信息
-      const lockedAmount = Number(delegation.delegateLocked);
-      if (reduceAmount > (availableAmount - lockedAmount)) {
-        const willBeFrozen = Math.min(reduceAmount, lockedAmount);
-        toast.success(
-          `减持的 ${willBeFrozen} LAT 将被冻结直到 ${estimatedUnlockDate.toLocaleDateString()} ${estimatedUnlockDate.toLocaleTimeString()}`
-        );
-      }
-
-      console.log('Sending transaction with params:', {
-        stakingBlockNum,
-        nodeId,
-        amount: amountInWei.toString(),
-        unlockDate: estimatedUnlockDate
-      });
-
-      // 使用 getParam 构造交易参数
       const param = getParam(1005, account, [
-        BigInt(stakingBlockNum),  // 将 stakingBlockNum 转换为 BigInt
-        nodeId,                   // 节点ID
-        amountInWei               // 使用 BigInt 处理的金额
+        BigInt(stakingBlockNum),
+        nodeId,
+        amountInWei
       ]);
 
-      // 发送交易
       const result = await window.ethereum.request({
         method: "eth_sendTransaction",
         params: [param],
       });
 
       console.log('减持委托交易结果:', result);
-      toast.success('减持委托成功');
+      toast.success(`成功减持 ${amount} LAT`, {
+        icon: '📉',
+        ...toastStyle
+      });
       
-      // 等待一段时间后再刷新列表，确保交易已被确认
-      setTimeout(() => {
-        fetchDelegations(account);
+      setTimeout(async () => {
+        try {
+          const platONAddress = convertToPlatONAddress(account);
+          await fetchDelegations(platONAddress);
+        } catch (error) {
+          console.error('刷新委托列表失败:', error);
+        }
       }, 5000);
-    } catch (error) {
-      console.error('减持委托错误:', error);
-      toast.error('减持委托失败，请重试');
+    } catch (error: any) {
+      handleTransactionError(error, toastId, '减持委托');
     } finally {
       setIsLoading(false);
     }
@@ -434,64 +408,130 @@ const Pools = () => {
   };
 
   const handleWithdrawUnlocked = async () => {
-    if (!window.ethereum) {
-      toast.error('请安装 MetaMask');
-      return;
-    }
-
     setIsLoading(true);
     try {
+      toast.loading('提取处理中...', {
+        icon: '⏳',
+        ...toastStyle
+      });
+
       const web3 = new Web3(window.ethereum);
       const accounts = await web3.eth.requestAccounts();
       const account = accounts[0];
 
-      // 使用 getParam 构造交易参数
       const param = getParam(1006, account, []);
 
-      // 发送交易
       const result = await window.ethereum.request({
         method: "eth_sendTransaction",
         params: [param],
       });
 
       console.log('领取解锁委托交易结果:', result);
-      toast.success('领取解锁委托成功');
-      fetchDelegations(account); // 刷新委托列表
+      toast.success('成功提取解锁委托', {
+        icon: '🔓',
+        ...toastStyle
+      });
+      fetchDelegations(account);
     } catch (error) {
-      console.error('领取解锁委托错误:', error);
-      toast.error('领取解锁委托失败，请重试');
+      console.error('提取解锁委托错误:', error);
+      toast.error('提取失败，请重试', {
+        icon: '❌',
+        ...toastStyle
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
+  // 通用的错误处理函数
+  const handleTransactionError = (error: any, toastId: string, action: string) => {
+    console.error(`${action}错误:`, error);
+    
+    if (error.code === 4001) {
+      toast.error('您取消了交易签名', {
+        id: toastId,
+        icon: '✋',
+        ...toastStyle
+      });
+    } else if (error.code === -32603) {
+      toast.error('交易执行失败，请检查您的余额和网络状态', {
+        id: toastId,
+        icon: '❌',
+        ...toastStyle
+      });
+    } else {
+      toast.error(`${action}失败，请重试`, {
+        id: toastId,
+        icon: '❌',
+        ...toastStyle
+      });
+    }
+  };
+
   const handleClaimReward = async (nodeId: string) => {
     if (!window.ethereum) {
-      toast.error('请安装 MetaMask');
+      toast.error('请安装 MetaMask', { 
+        icon: '🦊',
+        ...toastStyle 
+      });
       return;
     }
 
     setIsLoading(true);
+    let toastId = toast.loading('领取奖励处理中...', {
+      icon: '⏳',
+      ...toastStyle
+    });
+
     try {
       const web3 = new Web3(window.ethereum);
       const accounts = await web3.eth.requestAccounts();
       const account = accounts[0];
 
-      // 使用 getParam 构造交易参数
-      const param = getParam(5000, account, [nodeId]); // 添加节点ID参数
+      // 这里需要传入 nodeId 参数来领取特定节点的奖励
+      const param = getParam(5000, account, [nodeId]);
 
-      // 发送交易
-      const result = await window.ethereum.request({
+      const txHash = await window.ethereum.request({
         method: "eth_sendTransaction",
         params: [param],
       });
 
-      console.log('领取委托奖励交易结果:', result);
-      toast.success('领取委托奖励成功');
-      fetchDelegations(account); // 刷新委托列表
-    } catch (error) {
-      console.error('领取委托奖励错误:', error);
-      toast.error('领取委托奖励失败，请重试');
+      // 等待交易被确认
+      let receipt = null;
+      while (!receipt) {
+        try {
+          receipt = await web3.eth.getTransactionReceipt(txHash);
+          if (!receipt) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        } catch (err) {
+          console.log('等待交易确认中...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+
+      if (receipt.status) {
+        const delegation = delegations.find(d => d.nodeId === nodeId);
+        toast.success(`成功领取节点 ${delegation?.nodeName || ''} 的委托奖励`, {
+          id: toastId,
+          icon: '🎉',
+          ...toastStyle
+        });
+        
+        // 延迟一段时间后刷新数据
+        setTimeout(async () => {
+          const platONAddress = convertToPlatONAddress(account);
+          await fetchDelegations(platONAddress);
+        }, 3000);
+      } else {
+        toast.error('领取失败，请重试', {
+          id: toastId,
+          icon: '❌',
+          ...toastStyle
+        });
+      }
+    } catch (error: any) {
+      handleTransactionError(error, toastId, '领取奖励');
     } finally {
       setIsLoading(false);
     }
@@ -499,31 +539,66 @@ const Pools = () => {
 
   const handleClaimAllRewards = async () => {
     if (!window.ethereum) {
-      toast.error('请安装 MetaMask');
+      toast.error('请安装 MetaMask', { 
+        icon: '🦊',
+        ...toastStyle 
+      });
       return;
     }
 
     setIsLoading(true);
+    let toastId = toast.loading('领取所有奖励处理中...', {
+      icon: '⏳',
+      ...toastStyle
+    });
+
     try {
       const web3 = new Web3(window.ethereum);
       const accounts = await web3.eth.requestAccounts();
       const account = accounts[0];
 
-      // 使用 getParam 构造交易参数
-      const param = getParam(5000, account, []); // ���传节点ID表示领取所有
+      const param = getParam(5000, account, []);
 
-      // 发送交易
-      const result = await window.ethereum.request({
+      const txHash = await window.ethereum.request({
         method: "eth_sendTransaction",
         params: [param],
       });
 
-      console.log('领取所有委托奖励交易结果:', result);
-      toast.success('领取所有委托奖励成功');
-      fetchDelegations(account); // 刷新委托列表
-    } catch (error) {
-      console.error('领取委托奖励错误:', error);
-      toast.error('领取委托奖励失败，请重试');
+      // 等待交易被确认
+      let receipt = null;
+      while (!receipt) {
+        try {
+          receipt = await web3.eth.getTransactionReceipt(txHash);
+          if (!receipt) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        } catch (err) {
+          console.log('等待交易确认中...');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+
+      if (receipt.status) {
+        toast.success('领取所有委托奖励成功', {
+          id: toastId,
+          icon: '🎊',
+          ...toastStyle
+        });
+        
+        // 延迟一段时间后刷新数据
+        setTimeout(async () => {
+          const platONAddress = convertToPlatONAddress(account);
+          await fetchDelegations(platONAddress);
+        }, 3000);
+      } else {
+        toast.error('交易失败，请重试', {
+          id: toastId,
+          icon: '❌',
+          ...toastStyle
+        });
+      }
+    } catch (error: any) {
+      handleTransactionError(error, toastId, '领取奖励');
     } finally {
       setIsLoading(false);
     }
@@ -571,7 +646,12 @@ const Pools = () => {
             </SelectTrigger>
             <SelectContent>
               {SUPPORTED_NETWORKS.filter(network => network.chainType === selectedChainType.id).map(network => (
-                <SelectItem key={network.id} value={network.id}>
+                <SelectItem 
+                  key={network.id} 
+                  value={network.id}
+                  disabled={network.disabled}
+                  className={network.disabled ? "opacity-50 cursor-not-allowed" : ""}
+                >
                   <div className="flex items-center gap-2">
                     <Image
                       src={network.logo}
@@ -581,6 +661,9 @@ const Pools = () => {
                       className="rounded-full"
                     />
                     {network.name}
+                    {network.disabled && (
+                      <span className="text-xs text-gray-400 ml-2">(即将上线)</span>
+                    )}
                   </div>
                 </SelectItem>
               ))}
@@ -689,7 +772,14 @@ const Pools = () => {
 
           <TabsContent value="mydelegations">
             <div className="bg-white rounded-lg shadow overflow-hidden">
-              {delegations.length > 0 ? (
+              {isLoading ? (
+                // 加载状态
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mb-4"></div>
+                  <p className="text-gray-500">正在加载委托信息...</p>
+                </div>
+              ) : delegations.length > 0 ? (
+                // 有委托数据时显示表格
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -741,14 +831,21 @@ const Pools = () => {
                   </TableBody>
                 </Table>
               ) : (
-                <p>没有找到委托信息</p>
+                // 没有委托数据时显示空状态
+                <div className="flex flex-col items-center justify-center py-12">
+                  <div className="text-4xl mb-4">❌</div>
+                  <p className="text-gray-500 mb-2">没有找到委托信息</p>
+                  <p className="text-sm text-gray-400">您可以在节点列表中选择节点进行委托</p>
+                </div>
               )}
             </div>
-            <Pagination
-              currentPage={currentDelegationPage}
-              totalPages={totalDelegationPages}
-              onPageChange={setCurrentDelegationPage}
-            />
+            {delegations.length > 0 && (
+              <Pagination
+                currentPage={currentDelegationPage}
+                totalPages={totalDelegationPages}
+                onPageChange={setCurrentDelegationPage}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="frozen">
