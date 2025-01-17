@@ -293,9 +293,9 @@ export default function Quant() {
                 <ComingSoonPage />
               ) : activeTab === 'ai' ? (
                 <>
-                  <div className="bg-orange-100 text-orange-800 p-4 rounded-lg mb-8 max-w-[1400px]">
-                    Gridy AI Grid Bot目前还只提供测试，确保安全第一的实践，在这个不安的数字上工作，Gridy AI Grid Bot将通过展示，通过先进的人工智能技术和网格策略，它能够稳定获得超过30%年化收益率，AI Grid Bot即将揭晓！
-                  </div>
+                  {/* <div className="bg-orange-100 text-orange-800 p-4 rounded-lg mb-8 max-w-[1400px]">
+                     Bot目前还只提供测试，确保安全第一的实践，在这个不安的数字上工作， Bot将通过展示，通过先进的人工智能技术和网格策略，它能够稳定获得超过30%年化收益率，AI Grid Bot即将揭晓！
+                  </div> */}
 
                   <div className="mb-8 max-w-[1400px]">
                     <h1 className="text-2xl font-semibold mb-6 text-gray-800">创建AI Grid机器人</h1>
