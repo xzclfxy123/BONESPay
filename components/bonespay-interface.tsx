@@ -433,8 +433,8 @@ export function BONESPayInterface() {
             <h1 className="text-2xl font-bold">DeworkPay</h1>
           </a>
           <nav className="hidden md:flex space-x-4 border-l">
-            <a href="https://bones.icu/" className="text-sm font-medium ml-8">BONESDAO</a>
-            <a href="https://register.deworkhub.com/" className="text-sm font-medium">Register</a>
+            {/* <a href="https://bones.icu/" className="text-sm font-medium ml-8">BONESDAO</a> */}
+            <a href="https://register.deworkhub.com/" className="text-sm font-medium ml-8">Register</a>
             <a href="https://scan.platon.network/" className="text-sm font-medium">PlatScan</a>
             <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center text-sm font-medium">
