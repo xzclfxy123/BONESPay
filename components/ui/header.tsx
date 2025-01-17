@@ -37,7 +37,11 @@ const WALLETS_LINKS = [
   }
 ]
 
-export function Header() {
+interface HeaderProps {
+  className?: string;
+}
+
+export function Header({ className }: HeaderProps) {
   const [account, setAccount] = useState('')
   const [isConnecting, setIsConnecting] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
@@ -78,17 +82,16 @@ export function Header() {
   }
 
   return (
-    <header className="flex items-center justify-between p-4 bg-none">
+    <header className={`flex items-center justify-between p-4 bg-white border-b border-gray-200 ${className || ''}`}>
       <div className="flex items-center space-x-4">
         <Link href='/' className="flex items-center space-x-4">
           <Image src="/Dew.png" alt="BONESPay logo" width={32} height={32} className="w-8 h-8" />
           <h1 className="text-2xl font-bold">DeworkPay</h1>
         </Link>
         <nav className="hidden md:flex space-x-4 border-l">
-          <Link href="https://bones.icu/" className="text-sm font-medium ml-8">BONESDAO</Link>
-          <Link href="https://register.deworkhub.com/" className="text-sm font-medium">Register</Link>
+          {/* <Link href="https://bones.icu/" className="text-sm font-medium ml-8">BONESDAO</Link> */}
+          <Link href="https://register.deworkhub.com/" className="text-sm font-medium ml-8">Register</Link>
           <Link href="https://scan.platon.network/" className="text-sm font-medium">PlatScan</Link>
-          <Link href="/pools" className="text-sm font-medium">Pools</Link>
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center text-sm font-medium">
               Dapps <ChevronDown className="ml-1 h-4 w-4" />
@@ -141,8 +144,8 @@ export function Header() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <a href="./pages/pools" className="text-sm font-medium">Pools</a>
-          <a href="./pages/quant" className="text-sm font-medium">Quant</a>
+          <a href="./pools" className="text-sm font-medium">Pools</a>
+          <a href="./quant" className="text-sm font-medium">Quant</a>
         </nav>
       </div>
       <div className="flex items-center space-x-4">

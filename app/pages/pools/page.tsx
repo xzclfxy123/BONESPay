@@ -888,7 +888,7 @@ const Pools = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>区块</TableHead>
-                      <TableHead>冻结��委托金额</TableHead>
+                      <TableHead>冻结委托金额</TableHead>
                       <TableHead>已解冻的委托金额</TableHead>
                       <TableHead>未解冻的委托金额</TableHead>
                       <TableHead>预计解冻时间</TableHead>
