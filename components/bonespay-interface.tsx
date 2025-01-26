@@ -491,6 +491,7 @@ export function BONESPayInterface() {
       </DropdownMenu>
       <a href="./pages/pools" className="text-sm font-medium">Pools</a>
       <a href="./pages/quant" className="text-sm font-medium">Quant</a>
+      <a href="./event" className="text-sm font-medium">Event</a>
           </nav>
         </div>
         <div className="flex items-center space-x-1 mr-2">
@@ -638,6 +639,14 @@ export function BONESPayInterface() {
           )}
         </div>
       </header>
+      <div className="bg-purple-100 backdrop-blur-lg p-2 border-t border-b border-gray-200 flex items-center justify-center w-full mx-auto">
+        <div className="flex items-center space-x-2">
+          <span>🚀 PlatON Ecosystem Tour - Hopscotch Adventure 🎮 </span>
+          <Link href="./event" className="text-orange-500 hover:underline">
+            → Join
+          </Link>
+        </div>
+      </div>
       <main className="flex-grow p-4 max-w-md mx-auto w-full mt-10">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex justify-center"> 
