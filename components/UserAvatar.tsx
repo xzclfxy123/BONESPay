@@ -17,5 +17,5 @@ export function UserAvatar({ address, size = 64 }: UserAvatarProps) {
     }
   }, [address])
 
-  return <svg ref={svgRef} width={size} height={size} data-jdenticon-value={address} className="rounded-full" />
+  return <svg ref={svgRef} width={size} height={size} data-jdenticon-value={address} className="rounded-full absolute w-48 h-48 z-10" />
 }

@@ -12,12 +12,12 @@ export interface Cell {
 
 export const SURPRISE_CELLS = [6, 8, 16, 18, 20, 25, 28, 38, 58, 66, 68, 78, 88, 98, 99, 100]
 
-export const REWARDS: Record<RewardType, number[]> = {
-  ATON: [6, 25, 68],
-  NiftyIN: [8, 28, 78],
-  DipoleSwap: [16, 38, 88],
-  Topwallet: [18, 58, 98],
-  DeworkHub: [20, 66, 99, 100],
+export const REWARDS: Record<RewardType, { cells: number[] }> = {
+  ATON: { cells: [6, 25, 68] },
+  NiftyIN: { cells: [8, 28, 78] },
+  DipoleSwap: { cells: [16, 38, 88] },
+  Topwallet: { cells: [18, 58, 98] },
+  DeworkHub: { cells: [20, 66, 99, 100] },
 }
 
 // Define the exact layout from the image
