@@ -12,6 +12,7 @@
     "@ethereumjs/rlp": "^5.0.2",
     "@ethereumjs/util": "^9.1.0",
     "@ethersproject/providers": "^5.7.2",
+    "@ethersproject/units": "^5.7.0",
     "@platonnetwork/web3": "^0.16.1",
     "@platonnetwork/web3-core-helpers": "^1.0.0",
     "@radix-ui/react-checkbox": "^1.1.3",
