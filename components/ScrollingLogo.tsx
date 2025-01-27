@@ -6,10 +6,10 @@ import { useEffect, useState } from "react"
 const logos = [
   { src: "/PlatON-NETWORK.png", alt: "PlatON" },
   { src: "/DeworkHub.jpg", alt: "DeworkHub" },
-  { src: "/NiftyIN.jpg", alt: "NiftyIN" },
+  { src: "/NiftyINs.jpg", alt: "NiftyIN" },
   { src: "/ATON.png", alt: "ATON" },
   { src: "/DipoleSwap.jpg", alt: "DipoleSwap" },
-  { src: "/topwallet.png", alt: "topwallet" },
+  { src: "/topwallet2.png", alt: "topwallet" },
 ]
 
 export default function ScrollingLogoBanner() {
