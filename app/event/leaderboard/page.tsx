@@ -22,7 +22,7 @@ export default function LeaderboardPage() {
     const fetchLeaderboardData = async () => {
       try {
         // 获取用户列表
-        const usersResponse = await fetch("http://api.deworkhub.com/api/users", {
+        const usersResponse = await fetch("https://api.deworkhub.com/api/users", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
