@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useWallet } from "../context/WalletContext";
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/app/hooks/use-toast"
 
 type Reward = {
   id: string;

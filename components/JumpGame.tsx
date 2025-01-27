@@ -11,10 +11,10 @@ import {
   REWARDS,
   type RewardType,
   BOARD_LAYOUT,
-} from "../types/game";
+} from "@/app/types/game";
 import { Card } from "./ui/card";
 import Image from "next/image";
-import { useWallet } from "@/app/context/WalletContext";
+import { useWallet } from "@/app/event/context/WalletContext";
 import { UserAvatar } from "@/components/UserAvatar";
 import Link from "next/link";
 
