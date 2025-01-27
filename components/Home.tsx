@@ -134,7 +134,7 @@ export default function HomePage() {
               </Button>
 
               {/* 控制按钮的启用和链接 */}
-              <Link href={walletAddress ? `/game` : "#"}>
+              <Link href={walletAddress ? `/event/game` : "#"}>
                 <Button
                   size="lg"
                   className={`bg-gradient-to-r from-indigo-500 to-purple-500 text-white ${
