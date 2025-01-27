@@ -563,7 +563,7 @@ export default function JumpingGame({
         <div className="mt-4 text-center">
           <h2 className="text-2xl font-bold mb-2">恭喜您通关游戏！</h2>
           <p className="mb-4">您已经到达终点，请前往奖励中心兑换您的奖励。</p>
-          <Link href="/rewards" passHref>
+          <Link href="/event/rewards" passHref>
             <Button className="bg-green-500 hover:bg-green-600 text-white">
               进入奖励中心
             </Button>
