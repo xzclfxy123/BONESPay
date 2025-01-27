@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useWallet } from "@/app/event/context/WalletContext"
 
 declare global {
@@ -46,13 +46,16 @@ const fetchUserData = async (walletAddress: string) => {
 
 const addUserToDatabase = async (walletAddress: string) => {
   const response = await fetch("http://api.deworkhub.com/api/users", {
-    method: "POST",
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       address: walletAddress,
-      points: 0, // 初始积分为 0
+      points: 0,
+      completed_tasks: 0,
+      freeAttemptsToday: 1,
+      RemainingTimes: 0,
     }),
   });
   const data = await response.json();
@@ -64,33 +67,35 @@ export default function HomePage() {
   const [walletAddress, setWalletAddressLocal] = useState<string | null>(null);
   const [score, setScore] = useState<number>(0);
 
-  useEffect(() => {
-    // 仅在客户端执行的逻辑
-    if (typeof window !== "undefined" && window.ethereum) {
-      const connectMetaMask = async () => {
-        try {
-          const accounts = await window.ethereum.request({
-            method: "eth_requestAccounts",
-          });
-          const userAddress = accounts[0];
-          setWalletAddressLocal(userAddress);
-          setWalletAddress(userAddress);
+  const connectMetaMask = async () => {
+    if (typeof window.ethereum !== "undefined") {
+      try {
+        // 请求连接钱包
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        const userAddress = accounts[0];
+        setWalletAddressLocal(userAddress);
+        setWalletAddress(userAddress);
 
-          const user = await fetchUserData(userAddress);
-          if (user) {
-            setScore(user.points);
-          } else {
-            await addUserToDatabase(userAddress);
-            setScore(0);
-          }
-        } catch (error) {
-          console.error("连接 MetaMask 失败:", error);
+        // 查询数据库，获取用户数据
+        const user = await fetchUserData(userAddress);
+
+        if (user) {
+          // 如果用户存在，获取积分
+          setScore(user.points); // 更新为从返回数据中的 `points` 字段
+        } else {
+          // 如果用户不存在，添加新用户并初始化积分
+          await addUserToDatabase(userAddress);
+          setScore(0); // 新用户的初始积分为 0
         }
-      };
-
-      connectMetaMask();
+      } catch (error) {
+        console.error("连接 MetaMask 失败:", error);
+      }
+    } else {
+      alert("请安装 MetaMask!");
     }
-  }, [setWalletAddress]);
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -126,30 +131,26 @@ export default function HomePage() {
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white"
-                onClick={() => {
-                  if (typeof window !== "undefined" && window.ethereum) {
-                    connectMetaMask();
-                  } else {
-                    alert("请安装 MetaMask!");
-                  }
-                }}
+                onClick={connectMetaMask}
               >
                 连接钱包
               </Button>
 
-              <Link href={walletAddress ? `/event/game` : "#"}>
+              {/* 控制按钮的启用和链接 */}
+              <Link href={walletAddress ? `/game` : "#"}>
                 <Button
                   size="lg"
                   className={`bg-gradient-to-r from-indigo-500 to-purple-500 text-white ${
                     !walletAddress ? "cursor-not-allowed opacity-50" : ""
                   }`}
-                  disabled={!walletAddress}
+                  disabled={!walletAddress} // 禁用按钮
                 >
                   开始游戏
                 </Button>
               </Link>
             </motion.div>
 
+            {/* 钱包地址和积分显示 */}
             {walletAddress && (
               <div>
                 <p>钱包地址: {walletAddress}</p>
@@ -157,6 +158,7 @@ export default function HomePage() {
               </div>
             )}
 
+            {/* 如果钱包未连接，提示用户连接钱包 */}
             {!walletAddress && (
               <div className="text-red-500 mt-4">
                 <p>请先连接钱包才能开始游戏！</p>
