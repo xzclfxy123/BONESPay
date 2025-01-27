@@ -16,7 +16,7 @@ declare global {
 const fetchUserData = async (walletAddress: string) => {
   try {
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`
+      `https://api.deworkhub.com/api/users/${walletAddress}`
     );
 
     // 检查响应是否为 200 OK
@@ -45,7 +45,7 @@ const fetchUserData = async (walletAddress: string) => {
 };
 
 const addUserToDatabase = async (walletAddress: string) => {
-  const response = await fetch("http://api.deworkhub.com/api/users", {
+  const response = await fetch("https://api.deworkhub.com/api/users", {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

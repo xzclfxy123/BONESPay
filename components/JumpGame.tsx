@@ -57,7 +57,7 @@ function generateBoard(): Cell[] {
 const getRemainingTimes = async (walletAddress: string) => {
   try {
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`
+      `https://api.deworkhub.com/api/users/${walletAddress}`
     );
 
     if (response.ok) {
@@ -76,7 +76,7 @@ const getRemainingTimes = async (walletAddress: string) => {
 const updateUserScore = async (walletAddress: string, newScore: number) => {
   try {
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`,
+      `https://api.deworkhub.com/api/users/${walletAddress}`,
       {
         method: "PUT",
         headers: {
@@ -107,7 +107,7 @@ const updateFreeAttemptsToday = async (
 ) => {
   try {
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`,
+      `https://api.deworkhub.com/api/users/${walletAddress}`,
       {
         method: "PUT",
         headers: {
@@ -134,7 +134,7 @@ const updateRemainingTimes = async (
 ) => {
   try {
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`,
+      `https://api.deworkhub.com/api/users/${walletAddress}`,
       {
         method: "PUT",
         headers: {
@@ -171,7 +171,7 @@ const payTokens = async (walletAddress: string, amount: number) => {
       await transaction.wait(); // 等待交易确认
 
       // 代币支付成功后，调用API
-      const response = await fetch("http://api.deworkhub.com/api/task-user", {
+      const response = await fetch("https://api.deworkhub.com/api/task-user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -208,7 +208,7 @@ const payTokens = async (walletAddress: string, amount: number) => {
 const getCurrentPosition = async (walletAddress: string) => {
   try {
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`
+      `https://api.deworkhub.com/api/users/${walletAddress}`
     );
     const data = await response.json();
     if (data.success && data.data) {
@@ -230,7 +230,7 @@ const updateCurrentPosition = async (
 ) => {
   try {
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`,
+      `https://api.deworkhub.com/api/users/${walletAddress}`,
       {
         method: "PUT",
         headers: {
@@ -333,7 +333,7 @@ export default function JumpingGame({
     // 获取用户的剩余次数
     const getRemainingTimes = async () => {
       const response = await fetch(
-        `http://api.deworkhub.com/api/users/${walletAddress}`
+        `https://api.deworkhub.com/api/users/${walletAddress}`
       );
       const data = await response.json();
       if (data.success && data.data) {

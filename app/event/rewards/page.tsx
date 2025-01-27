@@ -26,7 +26,7 @@ type Reward = {
 const fetchUserScore = async (walletAddress: string) => {
   try {
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`
+      `https://api.deworkhub.com/api/users/${walletAddress}`
     );
     const data = await response.json();
     if (data.success && data.data) {
@@ -42,7 +42,7 @@ const fetchUserScore = async (walletAddress: string) => {
 // 兑换奖励的API
 const exchangeReward = async (walletAddress: string, reward: Reward) => {
   try {
-    const response = await fetch("http://api.deworkhub.com/api/exchange", {
+    const response = await fetch("https://api.deworkhub.com/api/exchange", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -76,7 +76,7 @@ const updateRemainingTimes = async (
   try {
     // 先获取当前的剩余次数
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`
+      `https://api.deworkhub.com/api/users/${walletAddress}`
     );
     const data = await response.json();
     const currentRemainingTimes = data?.data?.RemainingTimes || 0;
@@ -86,7 +86,7 @@ const updateRemainingTimes = async (
 
     // 提交更新
     const updateResponse = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`,
+      `https://api.deworkhub.com/api/users/${walletAddress}`,
       {
         method: "PUT",
         headers: {
@@ -110,7 +110,7 @@ const updateRemainingTimes = async (
 const updateUserScore = async (walletAddress: string, newScore: number) => {
   try {
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`,
+      `https://api.deworkhub.com/api/users/${walletAddress}`,
       {
         method: "PUT",
         headers: {
@@ -139,7 +139,7 @@ const updateUserSDFW = async (walletAddress: string, newSDFW: number) => {
   try {
     // 先获取当前的sDWH值
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`
+      `https://api.deworkhub.com/api/users/${walletAddress}`
     );
     const data = await response.json();
     const currentSDFW = data?.data?.sDWH || 0;
@@ -154,7 +154,7 @@ const updateUserSDFW = async (walletAddress: string, newSDFW: number) => {
 
     // 提交更新
     const updateResponse = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`,
+      `https://api.deworkhub.com/api/users/${walletAddress}`,
       {
         method: "PUT",
         headers: {

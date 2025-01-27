@@ -15,7 +15,7 @@ import { useWallet } from "../context/WalletContext";
 const fetchUserScore = async (walletAddress: string) => {
   try {
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`
+      `https://api.deworkhub.com/api/users/${walletAddress}`
     );
     const data = await response.json();
     if (data.success && data.data) {
@@ -32,7 +32,7 @@ const fetchUserScore = async (walletAddress: string) => {
 const fetchUserFreeAttempts = async (walletAddress: string) => {
   try {
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`
+      `https://api.deworkhub.com/api/users/${walletAddress}`
     );
     const data = await response.json();
     if (data.success && data.data) {
@@ -62,7 +62,7 @@ const updateUserLastLoginTime = async (walletAddress: string) => {
     console.log("Request Body:", body);
 
     const response = await fetch(
-      `http://api.deworkhub.com/api/users/${walletAddress}`,
+      `https://api.deworkhub.com/api/users/${walletAddress}`,
       {
         method: "PUT",
         headers: {
@@ -111,7 +111,7 @@ export default function GamePage() {
 
       const getRemainingTimes = async () => {
         const response = await fetch(
-          `http://api.deworkhub.com/api/users/${walletAddress}`
+          `https://api.deworkhub.com/api/users/${walletAddress}`
         );
         const data = await response.json();
         if (data.success && data.data) {
