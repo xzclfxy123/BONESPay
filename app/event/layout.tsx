@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import { cn } from "@/lib/utils";
 import { Background } from "@/components/ui/backgroud";
 import { WalletProvider } from "./context/WalletContext";
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
 import localFont from "next/font/local";
 
 const geistSans = localFont({
@@ -29,21 +29,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={cn(
-          `${geistSans.variable} ${geistMono.variable} min-h-screen antialiased overflow-y-auto scrollbar-hide`
-        )}
-      >
-        <WalletProvider>
-          <div className="w-full min-h-[6vh]">
-            <Navbar />
-          </div>
-          <Background />
-          {children}
-          <Toaster />
-        </WalletProvider>
-      </body>
-    </html>
+    <div
+      className={cn(
+        `${geistSans.variable} ${geistMono.variable} min-h-screen antialiased overflow-y-auto scrollbar-hide`
+      )}
+    >
+      <WalletProvider>
+        <div className="w-full min-h-[6vh]">
+          <Navbar />
+        </div>
+        <Background />
+        {children}
+        <Toaster />
+      </WalletProvider>
+    </div>
   );
 }
