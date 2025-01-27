@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Wallet, User, Users, LogOut, Copy, ExternalLink, Settings, ArrowLeft } from 'lucide-react'
 import { ethers } from 'ethers'
+import { Web3Provider } from '@ethersproject/providers'
+import { formatEther, parseEther, formatUnits, parseUnits } from '@ethersproject/units'
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -164,10 +166,9 @@ export function BONESPayInterface() {
 
   const fetchBalances = useCallback(async (address: string) => {
     if (typeof window.ethereum !== 'undefined') {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
-      
+      const provider = new Web3Provider(window.ethereum)
       const latBalance = await provider.getBalance(address)
-      setBalances(prev => ({ ...prev, LAT: ethers.utils.formatEther(latBalance) }))
+      setBalances(prev => ({ ...prev, LAT: formatEther(latBalance) }))
 
       for (const [token, tokenAddress] of Object.entries(TOKEN_ADDRESSES)) {
         const contract = new ethers.Contract(tokenAddress, ERC20_ABI, provider)
@@ -175,7 +176,7 @@ export function BONESPayInterface() {
         const decimals = await contract.decimals()
         setBalances(prev => ({ 
           ...prev, 
-          [token]: ethers.utils.formatUnits(balance, decimals) 
+          [token]: formatUnits(balance, decimals) 
         }))
       }
     }
@@ -243,12 +244,12 @@ export function BONESPayInterface() {
     setTransferError('')
 
     try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum)
+      const provider = new Web3Provider(window.ethereum)
       const signer = provider.getSigner()
 
       let tx;
       if (selectedAsset === 'LAT') {
-        const amountWei = ethers.utils.parseEther(amount)
+        const amountWei = parseEther(amount)
         tx = await signer.sendTransaction({
           to: recipient,
           value: amountWei
@@ -257,7 +258,7 @@ export function BONESPayInterface() {
         const tokenAddress = TOKEN_ADDRESSES[selectedAsset as keyof typeof TOKEN_ADDRESSES]
         const contract = new ethers.Contract(tokenAddress, ERC20_ABI, signer)
         const decimals = await contract.decimals()
-        const amountWei = ethers.utils.parseUnits(amount, decimals)
+        const amountWei = parseUnits(amount, decimals)
         tx = await contract.transfer(recipient, amountWei)
       }
 
