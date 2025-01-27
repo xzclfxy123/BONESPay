@@ -308,7 +308,7 @@ export default function JumpingGame({
       const newScore = score;
 
       if (freeAttemptsToday === 0 && remainingTimes <= 0) {
-        const paymentSuccess = await payTokens(walletAddress, 0.001); // 支付0.001代币
+        const paymentSuccess = await payTokens(walletAddress, 10); // 支付0.001代币
         if (paymentSuccess) {
           // 代币支付后更新积分
           await updateUserScore(walletAddress, newScore);
@@ -474,7 +474,7 @@ export default function JumpingGame({
     <div className="flex flex-col items-center justify-center">
       <Card className="bg-transparent border-0 shadow-none">
         <div className="relative w-full max-w-6xl p-4 rounded-lg overflow-hidden">
-          <div className="grid grid-cols-24 gap-1 bg-transparent">
+          <div className="grid grid-cols-24 gap-1 gap-x-2 space-x-2 bg-transparent">
             {board.map((cell, index) => (
               <div
                 key={index}
@@ -483,15 +483,14 @@ export default function JumpingGame({
                 }`}
               >
                 {!cell.isEmpty && (
-                  <Button
-                    className={`w-full bg-transparent h-full border-0 shadow-none ${
+                  <div
+                    className={`h-10 w-16 shadow-none opacity-100 ${
                       cell.number === playerPosition
                         ? "text-blue-500"
                         : cell.type === "surprise"
                         ? "bg-[url('/surprise-image.png')] bg-cover bg-center bg-[length:140%]"
                         : "bg-[url('/common-image.png')] bg-cover bg-center bg-[length:140%]"
                     }`}
-                    disabled={true}
                   >
                     {cell.number === playerPosition ? (
                       <motion.div
@@ -512,7 +511,7 @@ export default function JumpingGame({
                     ) : (
                       ""
                     )}
-                  </Button>
+                  </div>
                 )}
               </div>
             ))}
@@ -563,7 +562,7 @@ export default function JumpingGame({
         <div className="mt-4 text-center">
           <h2 className="text-2xl font-bold mb-2">恭喜您通关游戏！</h2>
           <p className="mb-4">您已经到达终点，请前往奖励中心兑换您的奖励。</p>
-          <Link href="/event/rewards" passHref>
+          <Link href="/rewards" passHref>
             <Button className="bg-green-500 hover:bg-green-600 text-white">
               进入奖励中心
             </Button>

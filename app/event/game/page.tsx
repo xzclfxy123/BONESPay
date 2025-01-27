@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { useWallet } from "../context/WalletContext";
+import ScrollingLogoBanner from "@/components/ScrollingLogo";
 
 const fetchUserScore = async (walletAddress: string) => {
   try {
@@ -130,7 +131,8 @@ export default function GamePage() {
   }, [walletAddress, freeAttemptsToday]);
 
   return (
-    <div className="flex items-center justify-center   min-h-[93vh] bg-gray-100 p-4 bg-[url('/backgroud.png')] bg-cover bg-center bg-no-repeat">
+    <div className="relative flex items-center justify-center min-h-[93vh] bg-gray-100 p-4 bg-[url('/backgroud.png')] bg-cover bg-center bg-no-repeat">
+      <ScrollingLogoBanner />
       <main className="flex-1 container py-6">
         <motion.div
           className="grid gap-6 lg:grid-cols-[1fr_300px]"
