@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
-import { useWallet } from "@/app/context/WalletContext"
+import { useWallet } from "@/app/event/context/WalletContext"
 
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ethereum?: any;
   }
 }
