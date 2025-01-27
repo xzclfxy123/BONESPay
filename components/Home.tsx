@@ -1,4 +1,4 @@
-"use client";
+"use client"; 
 
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -44,17 +44,19 @@ const fetchUserData = async (walletAddress: string) => {
   }
 };
 
+// 添加新用户
 const addUserToDatabase = async (walletAddress: string) => {
   const response = await fetch("https://api.deworkhub.com/api/users", {
-    method: "PUT",
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       address: walletAddress,
       points: 0,
-      completed_tasks: 0,
+      completed_steps: 0,
       freeAttemptsToday: 1,
+      lastResetDate: null,
       RemainingTimes: 0,
     }),
   });

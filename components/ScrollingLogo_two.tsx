@@ -12,7 +12,7 @@ const logos = [
   { src: "/topwallet.png", alt: "topwallet" },
 ]
 
-export default function ScrollingLogoBanner() {
+export default function ScrollingLogoBanner_two() {
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
@@ -24,14 +24,14 @@ export default function ScrollingLogoBanner() {
   }
 
   return (
-    <div className="absolute top-0 w-full overflow-hidden bg-gray-100 py-4">
+    <div className="w-full overflow-hidden bg-gray-100 py-4">
       <div className="flex animate-scroll">
         {[...logos, ...logos].map((logo, index) => (
           <div key={index} className="flex-shrink-0 mx-24 flex justify-center items-center">
             <Image
               src={logo.src || "/placeholder.svg"}
               alt={logo.alt}
-              width={50}
+              width={75}
               height={50}
               className="object-contain"
             />
