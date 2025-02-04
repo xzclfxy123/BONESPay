@@ -643,7 +643,7 @@ export function BONESPayInterface() {
       <div className="bg-purple-100 backdrop-blur-lg p-2 border-t border-b border-gray-200 flex items-center justify-center w-full mx-auto">
         <div className="flex items-center space-x-2">
           <span>🚀 PlatON Ecosystem Tour - Hopscotch Adventure 🎮 </span>
-          <Link href="./event" className="text-orange-500 hover:underline">
+          <Link href="https://event.deworkhub.com/" className="text-orange-500 hover:underline">
             → Join
           </Link>
         </div>
